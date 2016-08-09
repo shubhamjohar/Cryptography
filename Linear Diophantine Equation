@@ -1,0 +1,38 @@
+int main()
+{
+int x,y,c;
+cout<<"\nEnter the  coefficients of x and y and c value  respectively";
+cin>>x>>y;
+int gcd_xy=gcd(x,y);
+if(gcd_xy)
+  {
+   if((c%gcd_xy)==0)
+    {
+     cout<<"\nSolution Exists";
+    }
+    else
+    {
+     cout<<"\nSolution doesn't exist";
+    }
+  }
+return 0;
+}
+int gcd(int a,int b)
+{
+int remainder;
+while(b!=0)
+{
+remainder=a%b;
+if(remainder==0)
+   {
+   return b;
+   }
+else
+  {
+  a=b;
+  b=remainder;
+  gcd(a,b);
+  }
+}
+return b;
+}
