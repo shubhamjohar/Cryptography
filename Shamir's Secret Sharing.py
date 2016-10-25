@@ -41,84 +41,78 @@
 # 
 # where $l_j(x)=\prod_{0 \leq m<2, m \neq j}(\frac{x-x_m}{x_j-x_m})$
 
-# In[62]:
-
-from IPython.display import display, Math, Latex
-display(Math(r'F(k) = \int_{-\infty}^{\infty} f(x) e^{2\pi i k} dx'))
-
-
 ### Algorithm/Scheme Implementation:
 
-# In[63]:
+# In[1]:
 
-#Evaluates polynomial value at a particular point
-def eval_poly(t,x,a):
-    result=0
-    for i in range(len(a)):
-        result+=a[i]*x**i
-    return result
+import random
+import math
 
-
-# In[64]:
-
-#Calculating D
-def eval_poly(t,x,a):
-    result=0
-    for i in range(len(a)):
-        result+=a[i]*x**i
-    return result
-a=[3,1,2]
-t=3
-def D_array(n):
-    D_arr=[]
-    for i in range(1,n):
-        temp=[]
-        for j in range(1):
-            temp.append(i)
-            temp.append(eval_poly(t,i,a))
-        D_arr.append(temp)
-    return D_arr
-
-print(D_array(5))
-
-
-# In[ ]:
-
-arr=[]
-secret_key=int(input("Enter the secret key"))
-arr.append(secret_key)
-n=int(input("Enter the no of coefficients"))
-#Input coefficients
-for i in range(n):
-    arr.append(int(input("Enter the"+str(i+1)+" coefficient")))
-eval_poly(3,4,arr)
-
-
-# In[2]:
-
-def Lagranges_Interpolation(t):
-    print("Working!")
-     
-
-
-# <h3> Calculating $l_j(x)$ using formula</h3>
-# <br>
-# $l_j(x)=\prod_{0 \leq m <2,m \neq j}$
 
 # In[5]:
 
+#Calculating D
+
+n=int(input("Enter the number of locks "))
+k=int(input("Enter the keys required "))
+
+arr=[]
+
+secret_key=int(input("Enter the secret key "))
+arr.append(secret_key)
+nc=int(input("Enter the no of coefficients "))
+#Input coefficients
+for i in range(nc):
+    arr.append(int(input("Enter the "+str(i+1)+" coefficient ")))
+    
+print "\n Function coefficients are(First element is the secret) ",arr
+  
+def eval_poly(x,a):
+    result=0
+    for i in range(len(a)):
+        result+=a[i]*x**i
+    return result  
+
+D_arr=[]
+def D_array():
+    #D_arr=[]
+    for i in range(1,n+1):
+        temp=[]
+        for j in range(1):
+            temp.append(i)
+            temp.append(eval_poly(i,arr))
+        D_arr.append(temp)
+    return D_arr
+
+print "\nD Array is ",D_array()
+
+#Finding l(x)
+
+#Randomly taking any 3 keys
+    
+x_arr=[1,3,4]
+
+#kn=int(input("enter the number of shares"))
+#x_arr=[]
+#for i in range(kn):
+#    x_arr.append(int(input()))
+
+print "\n Taking  any  random keys pair",x_arr
+
+l_array=[]
+
 def l_x(t):
-    x_arr=[1,3,4]
     result_numerator=1
     result_denominator=1
-    l_array=[]
     for i in range(t):
         temp=[]
-        result_numerator=poly_mult([-1,x_arr[(i+1)%t]],[-1,x_arr[(i+2)%t]])
-        result_denominator=(x_arr[i%t]-x_arr[(i+1)%t])*(x_arr[i%t]-x_arr[(i+2)%t])
-        print(result_numerator)
-        print(result_denominator)
-        
+        for j in range(1,t):
+            result_numerator=poly_mult([-1,x_arr[(i+1)%t]],[-1,x_arr[(i+2)%t]])
+            result_denominator=(x_arr[i%t]-x_arr[(i+1)%t])*(x_arr[i%t]-x_arr[(i+2)%t])
+        temp.append(result_numerator)
+        temp.append(result_denominator)
+        l_array.append(temp)
+    return l_array
         
 def poly_mult(p,q):
     result_prod=[0]*(len(p)+len(q)-1)
@@ -126,47 +120,70 @@ def poly_mult(p,q):
         for j in range(len(q)):
             result_prod[i+j]+=p[i]*q[j]
     return result_prod
-    
 
+print "\n First array is for coefficients of numerator and second is for denominator ",l_x(3)
 
-# In[6]:
-
-l_x(3)
-
-
-# In[ ]:
-
-#Polynomials p and q are represented using arrays
 def poly_add(p,q):
     result_sum=p
     for i in range(len(q)):
         result_sum[i]+=q[i]
     return result_sum
-            
+
+def Lagranges_Interpolation():
+    L_array=[1]*len(x_arr)
+    L=[]
+    #L_arrays store y0 divided by l(x) denominator
+    for i in range(len(x_arr)):
+        L_array[i]=(D_arr[x_arr[i]-1][1])/l_array[i][1]
+    for i in range(len(L_array)):
+        t=[]
+        temp=l_array[i][0]
+        for j in range(len(temp)):
+            t.append(temp[j]*L_array[i])
+        L.append(t)
+    return reduce((lambda x,y:poly_add(x,y)),L)
+
+coefficients=Lagranges_Interpolation()
+#Decoded
+print "\n Coefficients are ",coefficients,"(decreasing power of x) "
+    
 
 
 # In[ ]:
 
-poly_add([5,0,10,6],[1,2,4])
+D_arr=[[1, 6], [2, 13], [3, 24], [4, 39]]
+x_arr=[1, 3, 4] 
+l_array=[[[1, -7, 12], 6], [[1, -5, 4], -2], [[1, -4, 3], 3]]
+L_array=[1]*3
 
 
-# In[7]:
+# In[ ]:
 
-#Polynomials p and q are represented using arrays
-def poly_mult(p,q):
+for i in range(len(x_arr)):
+    L_array[i]=(D_arr[x_arr[i]-1][1])/l_array[i][1]
+
+
+# In[37]:
+
+L_array
+
+
+# In[14]:
+
+test1= [[1, -7, 12],[1, -5, 4],[1, -4, 3]]
+def test():
+    return reduce(lambda x,y:x*y,range(1,10))
+
+def poly_mult(test):
     result_prod=[0]*(len(p)+len(q)-1)
     for i in range(len(p)):
         for j in range(len(q)):
             result_prod[i+j]+=p[i]*q[j]
-    return result_prod  
+    return result_prod
+test()
 
 
-# In[8]:
-
-print(poly_mult([5,0,10,6],[1,2,4]))
-
-
-# In[ ]:
+# In[27]:
 
 
 
